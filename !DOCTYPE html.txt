@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hyve CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F3EE;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --border: #E2DDD5;
+  --text: #1A1815;
+  --muted: #8C8880;
+  --accent: #1E6B4A;
+  --accent-light: #E8F3ED;
+  --accent2: #C4522A;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+.auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.auth-card { background: var(--surface); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); }
+.auth-logo { font-family: var(--font-display); font-size: 28px; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.auth-logo-dot { width: 10px; height: 10px; background: #4DBF88; border-radius: 50%; }
+.auth-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+.auth-tabs { display: flex; gap: 0; margin-bottom: 24px; background: var(--surface2); border-radius: 8px; padding: 3px; }
+.auth-tab { flex: 1; padding: 7px; text-align: center; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; color: var(--muted); border: none; background: none; font-family: var(--font-body); transition: all 0.15s; }
+.auth-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.auth-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.auth-field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.auth-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; font-family: var(--font-body); font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; }
+.auth-field input:focus { border-color: var(--accent); }
+.btn-auth { width: 100%; background: var(--accent); border: none; border-radius: 8px; padding: 12px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; color: #fff; margin-top: 6px; transition: background 0.15s; }
+.btn-auth:hover { background: #165438; }
+.btn-auth:disabled { background: #9CA3AF; cursor: not-allowed; }
+.auth-msg { font-size: 12px; margin-top: 12px; padding: 10px 12px; border-radius: 7px; text-align: center; }
+.auth-msg.error { background: #FEE2E2; color: #991B1B; }
+.auth-msg.success { background: var(--accent-light); color: var(--accent); }
+.header { background: var(--text); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.logo { font-family: var(--font-display); font-size: 20px; color: #fff; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+.logo-dot { width: 8px; height: 8px; background: #4DBF88; border-radius: 50%; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.btn-add { background: #4DBF88; color: var(--text); border: none; border-radius: 6px; padding: 7px 14px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
+.btn-add:hover { background: #3DAF78; }
+.user-pill { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 12px 4px 4px; }
+.user-avatar { width: 26px; height: 26px; border-radius: 50%; background: #4DBF88; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text); }
+.user-email { font-size: 12px; color: rgba(255,255,255,0.7); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn-signout { background: none; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 5px 10px; font-family: var(--font-body); font-size: 12px; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.15s; }
+.btn-signout:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+.stats-bar { display: flex; gap: 20px; }
+.stat { text-align: center; }
+.stat-num { font-size: 16px; font-weight: 600; color: #fff; line-height: 1; }
+.stat-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: .06em; margin-top: 1px; }
+.pipeline-wrap { overflow-x: auto; padding: 20px 24px 32px; display: flex; gap: 14px; min-height: calc(100vh - 52px); align-items: flex-start; }
+.stage-col { min-width: 240px; width: 240px; flex-shrink: 0; }
+.stage-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 2px; }
+.stage-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.stage-count { background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 600; border-radius: 20px; padding: 1px 8px; }
+.stage-drop { min-height: 60px; display: flex; flex-direction: column; gap: 10px; }
+.stage-drop.drag-over { background: rgba(30,107,74,0.05); border-radius: var(--radius); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; cursor: grab; box-shadow: var(--shadow); transition: box-shadow 0.15s, transform 0.15s; position: relative; user-select: none; }
+.card:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+.card.dragging { opacity: 0.4; }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.card-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; flex: 1; }
+.card-company { font-size: 12px; color: var(--muted); margin-bottom: 9px; }
+.card-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.chip { font-size: 11px; padding: 2px 7px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+.chip-units { background: #EEF3FB; color: #2C5F9E; }
+.chip-buildings { background: #F3EEFB; color: #5F2C9E; }
+.chip-value { background: var(--accent-light); color: var(--accent); }
+.card-footer { display: flex; align-items: center; justify-content: space-between; }
+.card-assignee { width: 22px; height: 22px; border-radius: 50%; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; color: #fff; }
+.card-dates { font-size: 10px; color: var(--muted); text-align: right; line-height: 1.6; }
+.overdue { color: #C4522A; font-weight: 500; }
+.add-card-btn { background: none; border: 2px dashed var(--border); border-radius: var(--radius); padding: 10px; width: 100%; cursor: pointer; color: var(--muted); font-family: var(--font-body); font-size: 12px; font-weight: 500; transition: border-color 0.15s, color 0.15s; text-align: center; margin-top: 2px; }
+.add-card-btn:hover { border-color: var(--accent); color: var(--accent); }
+.empty-col { border: 2px dashed var(--border); border-radius: var(--radius); padding: 18px 10px; text-align: center; color: var(--muted); font-size: 12px; }
+.s-prospect .stage-name { color: #6B7280; }
+.s-contacted .stage-name { color: #2563EB; }
+.s-demo .stage-name { color: #7C3AED; }
+.s-proposal .stage-name { color: #D97706; }
+.s-signed .stage-name { color: var(--accent); }
+.s-lost .stage-name { color: #9CA3AF; }
+.s-prospect .stage-count { background: #F3F4F6; color: #6B7280; }
+.s-contacted .stage-count { background: #EFF6FF; color: #2563EB; }
+.s-demo .stage-count { background: #F5F3FF; color: #7C3AED; }
+.s-proposal .stage-count { background: #FFFBEB; color: #D97706; }
+.s-signed .stage-count { background: var(--accent-light); color: var(--accent); }
+.s-lost .stage-count { background: #F9FAFB; color: #9CA3AF; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(20,18,15,0.55); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); transform: translateY(8px); transition: transform 0.2s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { padding: 22px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: var(--font-display); font-size: 20px; }
+.modal-close { background: var(--surface2); border: none; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 16px; color: var(--muted); display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: var(--border); }
+.modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.field input, .field select { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 9px 11px; font-family: var(--font-body); font-size: 13px; color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; }
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.btn-cancel { background: var(--surface2); border: none; border-radius: 7px; padding: 9px 16px; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); }
+.btn-cancel:hover { background: var(--border); }
+.btn-save { background: var(--accent); border: none; border-radius: 7px; padding: 9px 18px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; }
+.btn-save:hover { background: #165438; }
+.btn-delete { background: #FEE2E2; border: none; border-radius: 7px; padding: 9px 14px; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; color: #991B1B; margin-right: auto; }
+.btn-delete:hover { background: #FECACA; }
+.notes-section label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); display: block; margin-bottom: 5px; }
+.notes-log { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.note-entry { font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.note-entry:last-child { border-bottom: none; padding-bottom: 0; }
+.note-date { font-size: 10px; color: #C0B8AD; }
+.note-input-row { display: flex; gap: 8px; }
+.note-input-row input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 8px 11px; font-family: var(--font-body); font-size: 13px; color: var(--text); outline: none; }
+.note-input-row input:focus { border-color: var(--accent); }
+.btn-note { background: var(--text); border: none; border-radius: 7px; padding: 8px 14px; font-family: var(--font-body); font-size: 12px; font-weight: 600; cursor: pointer; color: #fff; white-space: nowrap; }
+.loading-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sync-badge { font-size: 11px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #4DBF88; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="loading-screen"><div class="spinner"></div><div style="color:var(--muted);font-size:13px">Loading Hyve CRM…</div></div>
+</div>
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">New Contact</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Name *</label><input id="f-name" placeholder="e.g. David Park" /></div>
+      <div class="field-row">
+        <div class="field"><label>Company / Property</label><input id="f-company" placeholder="Park Properties LLC" /></div>
+        <div class="field"><label>Stage</label>
+          <select id="f-stage">
+            <option value="prospect">Prospect</option>
+            <option value="contacted">Contacted</option>
+            <option value="demo">Demo Booked</option>
+            <option value="proposal">Proposal Sent</option>
+            <option value="signed">Signed</option>
+            <option value="lost">Lost</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Email</label><input id="f-email" type="email" placeholder="david@parkprops.com" /></div>
+        <div class="field"><label>Phone</label><input id="f-phone" placeholder="(310) 555-0100" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label># of Units</label><input id="f-units" type="number" placeholder="48" /></div>
+        <div class="field"><label># of Buildings</label><input id="f-buildings" type="number" placeholder="3" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Deal Value ($/yr)</label><input id="f-value" type="number" placeholder="12000" /></div>
+        <div class="field"><label>Assigned To</label>
+          <select id="f-assignee">
+            <option value="">Unassigned</option>
+            <option value="ME">Me</option>
+            <option value="ML">Melissa</option>
+            <option value="SR">Sales Rep</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Last Contact Date</label><input id="f-lastcontact" type="date" /></div>
+        <div class="field"><label>Next Follow-Up</label><input id="f-followup" type="date" /></div>
+      </div>
+      <div class="notes-section">
+        <label>Activity Log</label>
+        <div class="notes-log" id="notesLog"><div style="color:#C0B8AD;font-size:12px;font-style:italic">No activity yet</div></div>
+        <div class="note-input-row">
+          <input id="noteInput" placeholder="Log a note or activity…" onkeydown="if(event.key==='Enter')addNote()" />
+          <button class="btn-note" onclick="addNote()">Log</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-delete" id="btnDelete" onclick="deleteContact()" style="display:none">Delete</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveContact()">Save Contact</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL = 'https://eqkgyymcpspfaqztyckk.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxa2d5eW1jcHNwZmFxenR5Y2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODcwNDksImV4cCI6MjA5MDU2MzA0OX0.lL-CsmxF6XR7OUO8m7_OlDuPf7C95q0O47jZWj8mmR8';
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const STAGES = [
+  { id: 'prospect',  label: 'Prospect',      cls: 's-prospect'  },
+  { id: 'contacted', label: 'Contacted',     cls: 's-contacted'  },
+  { id: 'demo',      label: 'Demo Booked',   cls: 's-demo'       },
+  { id: 'proposal',  label: 'Proposal Sent', cls: 's-proposal'   },
+  { id: 'signed',    label: 'Signed ✓',      cls: 's-signed'     },
+  { id: 'lost',      label: 'Lost',          cls: 's-lost'       },
+];
+const COLORS = { ME: '#1E6B4A', ML: '#7C3AED', SR: '#C4522A', '': '#9CA3AF' };
+let contacts = [], currentUser = null, editingId = null, dragId = null, pendingNotes = [];
+const { data: { session } } = await sb.auth.getSession();
+currentUser = session?.user ?? null;
+currentUser ? renderApp() : renderAuth();
+sb.auth.onAuthStateChange((_e, sess) => { currentUser = sess?.user ?? null; currentUser ? renderApp() : renderAuth(); });
+function renderAuth(mode = 'signin') {
+  document.getElementById('app').innerHTML = `
+    <div class="auth-wrap"><div class="auth-card">
+      <div class="auth-logo"><div class="auth-logo-dot"></div> Hyve CRM</div>
+      <div class="auth-sub">Enterprise Returns · Landlord Outreach</div>
+      <div class="auth-tabs">
+        <button class="auth-tab ${mode==='signin'?'active':''}" onclick="renderAuth('signin')">Sign In</button>
+        <button class="auth-tab ${mode==='signup'?'active':''}" onclick="renderAuth('signup')">Invite Teammate</button>
+      </div>
+      ${mode==='signin' ? `
+        <div class="auth-field"><label>Email</label><input id="a-email" type="email" placeholder="you@hyve.com" /></div>
+        <div class="auth-field"><label>Password</label><input id="a-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doSignIn()" /></div>
+        <button class="btn-auth" onclick="doSignIn()">Sign In →</button>
+      ` : `
+        <div class="auth-field"><label>Teammate Email</label><input id="a-email" type="email" placeholder="melissa@hyve.com" /></div>
+        <div class="auth-field"><label>Set Password</label><input id="a-pass" type="password" placeholder="••••••••" /></div>
+        <button class="btn-auth" onclick="doSignUp()">Create Account →</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center">Share the password with your teammate after creating</div>
+      `}
+      <div id="auth-msg"></div>
+    </div></div>`;
+  window.renderAuth = renderAuth; window.doSignIn = doSignIn; window.doSignUp = doSignUp;
+}
+async function doSignIn() {
+  const email = document.getElementById('a-email').value.trim();
+  const pass = document.getElementById('a-pass').value;
+  const btn = document.querySelector('.btn-auth');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { showAuthMsg(error.message, 'error'); btn.disabled = false; btn.textContent = 'Sign In →'; }
+}
+async function doSignUp() {
+  const email = document.getElementById('a-email').value.trim();
+  const pass = document.getElementById('a-pass').value;
+  const btn = document.querySelector('.btn-auth');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  const { error } = await sb.auth.signUp({ email, password: pass });
+  if (error) { showAuthMsg(error.message, 'error'); btn.disabled = false; btn.textContent = 'Create Account →'; }
+  else { showAuthMsg('Account created! They can now sign in.', 'success'); btn.disabled = false; btn.textContent = 'Create Account →'; }
+}
+function showAuthMsg(msg, type) { const el = document.getElementById('auth-msg'); el.className = `auth-msg ${type}`; el.textContent = msg; }
+async function renderApp() {
+  document.getElementById('app').innerHTML = `
+    <div class="header">
+      <div class="logo"><div class="logo-dot"></div> Hyve CRM</div>
+      <div class="stats-bar" id="statsBar"></div>
+      <div class="header-right">
+        <div class="sync-badge"><div class="sync-dot"></div> Live</div>
+        <div class="user-pill">
+          <div class="user-avatar">${currentUser.email[0].toUpperCase()}</div>
+          <span class="user-email">${currentUser.email}</span>
+        </div>
+        <button class="btn-add" onclick="openModal()">+ Add Contact</button>
+        <button class="btn-signout" onclick="doSignOut()">Sign out</button>
+      </div>
+    </div>
+    <div class="pipeline-wrap" id="pipeline"></div>`;
+  window.openModal = openModal; window.doSignOut = doSignOut;
+  await loadContacts(); subscribeRealtime();
+}
+async function doSignOut() { await sb.auth.signOut(); }
+async function loadContacts() {
+  const { data, error } = await sb.from('contacts').select('*').order('created_at', { ascending: true });
+  if (!error) { contacts = data || []; render(); }
+}
+function subscribeRealtime() {
+  sb.channel('contacts-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, () => loadContacts())
+    .subscribe();
+}
+function render() {
+  const pipeline = document.getElementById('pipeline');
+  if (!pipeline) return;
+  pipeline.innerHTML = '';
+  STAGES.forEach(stage => {
+    const cards = contacts.filter(c => c.stage === stage.id);
+    const col = document.createElement('div');
+    col.className = `stage-col ${stage.cls}`;
+    col.innerHTML = `
+      <div class="stage-header">
+        <span class="stage-name">${stage.label}</span>
+        <span class="stage-count">${cards.length}</span>
+      </div>
+      <div class="stage-drop" id="drop-${stage.id}"
+           ondragover="onDragOver(event,'${stage.id}')"
+           ondragleave="onDragLeave(event)"
+           ondrop="onDrop(event,'${stage.id}')">
+        ${cards.length===0 ? `<div class="empty-col">Drop here</div>` : ''}
+        ${cards.map(c => cardHTML(c)).join('')}
+        <button class="add-card-btn" onclick="openModal('${stage.id}')">+ Add to ${stage.label.replace(' ✓','')}</button>
+      </div>`;
+    pipeline.appendChild(col);
+  });
+  updateStats();
+  window.onDragOver = onDragOver; window.onDragLeave = onDragLeave; window.onDrop = onDrop;
+  window.onDragStart = onDragStart; window.onDragEnd = onDragEnd; window.openEdit = openEdit;
+}
+function cardHTML(c) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  let followUpStr = '';
+  if (c.follow_up) {
+    const d = new Date(c.follow_up+'T00:00:00');
+    const diff = Math.round((d-today)/86400000);
+    if (diff<0) followUpStr=`<span class="overdue">⚑ Overdue ${Math.abs(diff)}d</span>`;
+    else if (diff===0) followUpStr=`<span class="overdue">⚑ Today</span>`;
+    else followUpStr=`<span>⚑ in ${diff}d</span>`;
+  }
+  const lastStr = c.last_contact ? `Last: ${fmtDate(c.last_contact)}` : '';
+  const assignee = c.assignee||'';
+  const avatar = `<div class="card-assignee" style="background:${COLORS[assignee]||'#9CA3AF'}">${assignee||'—'}</div>`;
+  return `<div class="card" id="card-${c.id}" draggable="true"
+    ondragstart="onDragStart(event,'${c.id}')" ondragend="onDragEnd(event)"
+    onclick="openEdit('${c.id}')">
+    <div class="card-top"><div class="card-name">${c.name}</div></div>
+    ${c.company ? `<div class="card-company">${c.company}</div>` : ''}
+    <div class="card-chips">
+      ${c.units ? `<span class="chip chip-units">${c.units} units</span>` : ''}
+      ${c.buildings ? `<span class="chip chip-buildings">${c.buildings} bldgs</span>` : ''}
+      ${c.value ? `<span class="chip chip-value">$${Number(c.value).toLocaleString()}/yr</span>` : ''}
+    </div>
+    <div class="card-footer">${avatar}
+      <div class="card-dates">${followUpStr ? followUpStr+'<br>' : ''}${lastStr}</div>
+    </div>
+  </div>`;
+}
+function updateStats() {
+  const el = document.getElementById('statsBar'); if (!el) return;
+  const signed = contacts.filter(c=>c.stage==='signed').length;
+  const pipe = contacts.filter(c=>!['signed','lost'].includes(c.stage)).reduce((s,c)=>s+(Number(c.value)||0),0);
+  const overdue = contacts.filter(c=>c.follow_up&&new Date(c.follow_up+'T00:00:00')<new Date()).length;
+  el.innerHTML = `
+    <div class="stat"><div class="stat-num">${contacts.length}</div><div class="stat-label">Contacts</div></div>
+    <div class="stat"><div class="stat-num">${signed}</div><div class="stat-label">Signed</div></div>
+    <div class="stat"><div class="stat-num">$${pipe>=1000?(pipe/1000).toFixed(0)+'k':pipe}/yr</div><div class="stat-label">Pipeline</div></div>
+    ${overdue>0?`<div class="stat"><div class="stat-num" style="color:#F87171">${overdue}</div><div class="stat-label">Overdue</div></div>`:''}`;
+}
+function fmtDate(str) { if (!str) return ''; return new Date(str+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function onDragStart(e,id) { dragId=id; setTimeout(()=>document.getElementById('card-'+id)?.classList.add('dragging'),0); }
+function onDragEnd(e) { document.getElementById('card-'+dragId)?.classList.remove('dragging'); dragId=null; }
+function onDragOver(e,stageId) { e.preventDefault(); document.getElementById('drop-'+stageId)?.classList.add('drag-over'); }
+function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+async function onDrop(e,stageId) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over'); if (!dragId) return;
+  const c = contacts.find(x=>x.id===dragId);
+  if (c&&c.stage!==stageId) { c.stage=stageId; render(); await sb.from('contacts').update({stage:stageId}).eq('id',dragId); }
+}
+function openModal(stageId) {
+  editingId=null; pendingNotes=[];
+  document.getElementById('modalTitle').textContent='New Contact';
+  document.getElementById('btnDelete').style.display='none';
+  clearForm();
+  if (stageId) document.getElementById('f-stage').value=stageId;
+  document.getElementById('notesLog').innerHTML='<div style="color:#C0B8AD;font-size:12px;font-style:italic">No activity yet</div>';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function openEdit(id) {
+  const c=contacts.find(x=>x.id===id); if (!c) return;
+  editingId=id; pendingNotes=[];
+  document.getElementById('modalTitle').textContent=c.name;
+  document.getElementById('btnDelete').style.display='block';
+  document.getElementById('f-name').value=c.name||'';
+  document.getElementById('f-company').value=c.company||'';
+  document.getElementById('f-stage').value=c.stage||'prospect';
+  document.getElementById('f-email').value=c.email||'';
+  document.getElementById('f-phone').value=c.phone||'';
+  document.getElementById('f-units').value=c.units||'';
+  document.getElementById('f-buildings').value=c.buildings||'';
+  document.getElementById('f-value').value=c.value||'';
+  document.getElementById('f-assignee').value=c.assignee||'';
+  document.getElementById('f-lastcontact').value=c.last_contact||'';
+  document.getElementById('f-followup').value=c.follow_up||'';
+  renderNotes(c.notes||[]);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+window.closeModal = function() { document.getElementById('modalOverlay').classList.remove('open'); editingId=null; pendingNotes=[]; }
+window.handleOverlayClick = function(e) { if (e.target===document.getElementById('modalOverlay')) window.closeModal(); }
+window.saveContact = async function() {
+  const name=document.getElementById('f-name').value.trim(); if (!name) { document.getElementById('f-name').focus(); return; }
+  const existingNotes=editingId?(contacts.find(x=>x.id===editingId)?.notes||[]):[];
+  const data={name,company:document.getElementById('f-company').value.trim(),stage:document.getElementById('f-stage').value,
+    email:document.getElementById('f-email').value.trim(),phone:document.getElementById('f-phone').value.trim(),
+    units:document.getElementById('f-units').value||null,buildings:document.getElementById('f-buildings').value||null,
+    value:document.getElementById('f-value').value||null,assignee:document.getElementById('f-assignee').value,
+    last_contact:document.getElementById('f-lastcontact').value||null,follow_up:document.getElementById('f-followup').value||null,
+    notes:[...existingNotes,...pendingNotes]};
+  if (editingId) await sb.from('contacts').update(data).eq('id',editingId);
+  else await sb.from('contacts').insert(data);
+  window.closeModal();
+}
+window.deleteContact = async function() { if (!editingId) return; await sb.from('contacts').delete().eq('id',editingId); window.closeModal(); }
+window.addNote = function() {
+  const inp=document.getElementById('noteInput'); const text=inp.value.trim(); if (!text) return;
+  const now=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const note={text,date:now,by:currentUser?.email?.split('@')[0]||''};
+  pendingNotes.push(note);
+  const existingNotes=editingId?(contacts.find(x=>x.id===editingId)?.notes||[]):[];
+  renderNotes([...existingNotes,...pendingNotes]); inp.value='';
+}
+function renderNotes(notes) {
+  const log=document.getElementById('notesLog');
+  if (!notes?.length) { log.innerHTML='<div style="color:#C0B8AD;font-size:12px;font-style:italic">No activity yet</div>'; return; }
+  log.innerHTML=[...notes].reverse().map(n=>`<div class="note-entry"><div>${n.text}${n.by?` <span style="color:#C0B8AD">— ${n.by}</span>`:''}</div><div class="note-date">${n.date}</div></div>`).join('');
+}
+function clearForm() {
+  ['f-name','f-company','f-email','f-phone','f-units','f-buildings','f-value','f-lastcontact','f-followup'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-stage').value='prospect'; document.getElementById('f-assignee').value='';
+}
+</script>
+</body>
+</html>
